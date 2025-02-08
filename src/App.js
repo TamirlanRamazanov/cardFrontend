@@ -1,10 +1,11 @@
 import React from 'react';
 import './App.css';
+import cardImage from './assets/cards/PrimeRayleigh.png'
 
 function App() {
   return (
     <div className="container">
-      <div className="rectangle"></div>
+      <img src={cardImage} alt='Card' className='card-image' />
     </div>
   );
 }

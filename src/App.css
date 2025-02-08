@@ -6,10 +6,8 @@
   justify-content: center;
   align-items: center;
 }
-
-.rectangle {
-  width: 158.3vh;
+.card-image {
+  width:auto;
   height: 235.5vh;
-  background-color: gray;
   transform: scale(0.108); /* уменьшаем размер, чтобы прямоугольник поместился на экране */
-} 
+}
