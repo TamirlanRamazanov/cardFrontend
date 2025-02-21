@@ -2,12 +2,22 @@
   width: 100vw;
   height: 100vh;
   background-color: green;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
+
 .card-image {
-  width:auto;
+  width: auto;
   height: 235.5vh;
-  transform: scale(0.108); /* уменьшаем размер, чтобы прямоугольник поместился на экране */
+  transform: scale(0.135);
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.135);
+}
+
+.card-image:active {
+  cursor: grabbing;
 }
