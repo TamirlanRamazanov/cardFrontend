@@ -6,18 +6,43 @@
   overflow: hidden;
 }
 
+/* Единое место для управления размерами и позиционированием карт */
 .card-image {
+  --card-scale: 1; /* Переменная для управления размером карт */
+  --card-stack-position-x: 10vw; /* Позиция стопки карт по X */
+  --card-stack-position-y: 85vh; /* Позиция стопки карт по Y */
+
   width: auto;
-  height: 235.5vh;
-  transform: scale(0.135);
+  height: 23vh;
   position: absolute;
   cursor: grab;
   user-select: none;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0.135);
+  left: var(--card-stack-position-x);
+  top: var(--card-stack-position-y);
+  transform: translate(-50%, -50%) scale(var(--card-scale));
+  z-index: 3;
+  transition: transform 0.2s ease-out;
 }
 
 .card-image:active {
   cursor: grabbing;
+}
+
+.draw-button {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.draw-button:hover {
+  background-color: #45a049;
 }

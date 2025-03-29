@@ -1,22 +1,44 @@
 import React, { useState } from 'react';
 import './App.css';
-import Card from './components/Card';
+import Card from './components/Card/Card';
+import Table from './Table/Table';
 import { deckService } from './services/DeckService';
 
 function App() {
   const [activeCards, setActiveCards] = useState([]);
-
+  
   const handleDrawCard = () => {
-    const newCard = deckService.drawCard();
-    setActiveCards(prev => [...prev, newCard]);
+    try {
+      const newCard = deckService.drawCard();
+      console.log('Drawn card:', newCard);
+      if (newCard) {
+        setActiveCards(prev => [...prev, newCard]);
+      } else {
+        console.log('No more cards in the deck');
+      }
+    } catch (error) {
+      console.error('Error drawing card:', error);
+    }
   };
+
+  console.log('Current active cards:', activeCards);
 
   return (
     <div className="container">
-      {activeCards.map(card => (
-        <Card key={card.id} cardId={card.id} />
+      <Table />
+      {activeCards.map((card, index) => (
+        <Card 
+          key={card.id} 
+          cardId={card.id} 
+          index={index}
+        />
       ))}
-      <button onClick={handleDrawCard}>Draw Card</button>
+      <button 
+        className="draw-button" 
+        onClick={handleDrawCard}
+      >
+        Draw Card
+      </button>
     </div>
   );
 }

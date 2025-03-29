@@ -1,0 +1,29 @@
+.table-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw; /* Используем 90% ширины viewport */
+  height: 45.95vw; /* Сохраняем пропорции (656/1141 ≈ 0.517) */
+  max-width: 1141px; /* Оригинальная максимальная ширина */
+  max-height: 656px; /* Оригинальная максимальная высота */
+  z-index: 1;
+  pointer-events: none; /* Позволяет кликать через стол на элементы под ним */
+  transition: width 0.3s ease-out, height 0.3s ease-out;
+}
+
+.table-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Для экранов с соотношением сторон отличным от 16:9 */
+@media screen and (max-aspect-ratio: 1141/656) {
+  .table-container {
+    width: 157vh; /* (1141/656) * 90vh */
+    height: 90vh;
+    max-width: none;
+    max-height: none;
+  }
+} 

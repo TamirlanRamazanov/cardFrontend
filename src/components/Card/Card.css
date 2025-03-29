@@ -1,21 +1,28 @@
 .card-image card-draggable {
   width: auto;
-  height: 235.5vh;
-  position: absolute;
+  height: 125vh;
+  position: relative;
+  z-index: 3;
   cursor: grab;
   user-select: none;
   left: 10%;
   top: 80%;
   will-change: transform;
   touch-action: none;
-  transform: scale(0.235);
+  transform: scale(0.12);
 }
 
 .card-draggable {
   left: 50%;
   top: 50%;
+  position: relative;
+  z-index: 3;
+  transform: scale(0.12);
 }
 
 .card-image:active {
   cursor: grabbing;
+  position: relative;
+  z-index: 3;
+  transform: scale(0.12);
 } 

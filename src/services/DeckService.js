@@ -5,6 +5,7 @@ class DeckService {
     this.deck = [...CARDS_DATA];
     this.activeCards = [];
     this.discardPile = [];
+    this.shuffle();
   }
 
   getAllCards() {
@@ -15,16 +16,17 @@ class DeckService {
     return getCardById(id);
   }
 
-  shuffleDeck() {
-    this.deck = [...this.deck].sort(() => Math.random() - 0.5);
-    return this.deck;
+  shuffle() {
+    for (let i = this.deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+    }
   }
 
   drawCard() {
     if (this.deck.length === 0) {
-      // Если колода пуста, перемешиваем сброс
-      this.deck = this.shuffleDeck([...this.discardPile]);
-      this.discardPile = [];
+      console.log('Deck is empty');
+      return null;
     }
     const card = this.deck.pop();
     this.activeCards.push(card);
@@ -43,7 +45,7 @@ class DeckService {
     this.deck = [...CARDS_DATA];
     this.activeCards = [];
     this.discardPile = [];
-    this.shuffleDeck();
+    this.shuffle();
   }
 
   getCardsByFaction(factionId) {
