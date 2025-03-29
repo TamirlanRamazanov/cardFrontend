@@ -4,7 +4,6 @@ import Card from './components/Card/Card';
 import Table from './Table/Table';
 import SlotsContainer from './components/Slot/SlotsContainer';
 import { deckService } from './services/DeckService';
-import { gameStateService } from './services/GameStateService';
 
 function App() {
   const [mode, setMode] = useState('attack');
@@ -23,28 +22,11 @@ function App() {
   };
 
   const handleCardPlaced = () => {
-    if (!gameStateService.canPlaceCard()) {
-      return;
-    }
-    const newOccupiedSlots = gameStateService.incrementOccupiedSlots();
-    setOccupiedSlots(newOccupiedSlots);
+    setOccupiedSlots(prev => Math.min(prev + 1, 6));
   };
 
   const toggleMode = () => {
-    const newMode = mode === 'attack' ? 'defend' : 'attack';
-    setMode(newMode);
-    gameStateService.setMode(newMode);
-    
-    // При переходе в режим защиты скрываем свободные слоты
-    const slots = document.querySelectorAll('.slot:not(.occupied)');
-    slots.forEach(slot => {
-      slot.style.display = newMode === 'defend' ? 'none' : 'block';
-    });
-
-    // При переходе в режим атаки сбрасываем счетчик
-    if (newMode === 'attack') {
-      setOccupiedSlots(0);
-    }
+    setMode(mode === 'attack' ? 'defend' : 'attack');
   };
 
   return (

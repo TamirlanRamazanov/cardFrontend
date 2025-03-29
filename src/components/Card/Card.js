@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { deckService } from '../../services/DeckService';
-import { gameStateService } from '../../services/GameStateService';
 import './Card.css';
 
 const Card = ({ cardId, index, onPlaced }) => {
@@ -69,13 +68,6 @@ const Card = ({ cardId, index, onPlaced }) => {
   
   const handleMouseUp = () => {
     if (!isDragging) return;
-
-    // Проверяем можно ли размещать карты в текущем режиме
-    if (!gameStateService.canPlaceCard()) {
-      setIsDragging(false);
-      document.querySelectorAll('.slot.highlight').forEach(s => s.classList.remove('highlight'));
-      return;
-    }
 
     const slot = document.querySelector('.slot.highlight');
     if (slot) {
