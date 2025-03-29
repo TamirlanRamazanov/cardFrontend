@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Table.css';
 
-const Table = () => {
+const Table = ({ children }) => {
   const [dimensions, setDimensions] = useState({
     width: 0,
     height: 0
@@ -56,6 +56,7 @@ const Table = () => {
         alt="Card Table" 
         className="table-image"
       />
+      {children}
     </div>
   );
 };

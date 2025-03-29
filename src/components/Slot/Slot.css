@@ -1,0 +1,56 @@
+.slots-container {
+    position: fixed;
+    display: flex;
+    gap: 25px; /* Расстояние между слотами */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    justify-content: center; /* Центрируем слоты по горизонтали */
+    align-items: center; /* Центрируем слоты по вертикали */
+    transition: all 0.3s ease; /* Добавляем плавную анимацию для контейнера */
+}
+
+.slot {
+    width: 125px;
+    height: 188px;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Изменено с absolute на relative */
+    transition: all 0.3s ease; /* Добавляем плавную анимацию для слотов */
+}
+
+.slot-inner {
+    width: 100px;
+    height: 160px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.slot.highlight {
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.slot.occupied {
+    pointer-events: none;
+}
+
+/* Анимация появления нового слота */
+.slot.new-slot {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

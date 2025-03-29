@@ -2,37 +2,24 @@
   width: 100vw;
   height: 100vh;
   background-color: #585757;
-  position: relative;
+  position: fixed;
   overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
-/* Единое место для управления размерами и позиционированием карт */
-.card-image {
-  --card-scale: 1; /* Переменная для управления размером карт */
-  --card-stack-position-x: 10vw; /* Позиция стопки карт по X */
-  --card-stack-position-y: 85vh; /* Позиция стопки карт по Y */
-
-  width: auto;
-  height: 23vh;
-  position: absolute;
-  cursor: grab;
-  user-select: none;
-  left: var(--card-stack-position-x);
-  top: var(--card-stack-position-y);
-  transform: translate(-50%, -50%) scale(var(--card-scale));
-  z-index: 3;
-  transition: transform 0.2s ease-out;
-}
-
-.card-image:active {
-  cursor: grabbing;
-}
-
-.draw-button {
+.buttons-container {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 2;
+}
+
+.draw-button {
   padding: 10px 20px;
   font-size: 16px;
   background-color: #4CAF50;
@@ -40,9 +27,34 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  z-index: 2;
 }
 
 .draw-button:hover {
+  background-color: #45a049;
+}
+
+.action-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button.attack {
+  background-color: #ff4444;
+}
+
+.action-button.attack:hover {
+  background-color: #cc0000;
+}
+
+.action-button.defend {
+  background-color: #4CAF50;
+}
+
+.action-button.defend:hover {
   background-color: #45a049;
 }
