@@ -1,14 +1,30 @@
 .slots-container {
     position: fixed;
     display: flex;
-    gap: 25px; /* Расстояние между слотами */
+    flex-direction: column; /* Расстояние между основными слотами и покрытыми */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
-    justify-content: center; /* Центрируем слоты по горизонтали */
-    align-items: center; /* Центрируем слоты по вертикали */
-    transition: all 0.3s ease; /* Добавляем плавную анимацию для контейнера */
+    transition: all 0.3s ease;
+}
+
+
+.main-slots {
+    display: flex;
+    gap: 25px; /* Расстояние между слотами */
+    justify-content: center; /* Центрируем слоты по ширине */
+    align-items: center;
+}
+
+.covered-slots {
+    display: flex;
+    gap: 25px; /* Такое же расстояние как у основных слотов */
+    justify-content: center; /* Центрируем слоты по ширине */
+    align-items: center;
+    margin-top: 20px; /* Добавляем отступ сверху */
+    transition: all 0.3s ease;
+    height: 188px; /* Фиксированная высота, равная высоте карты */
 }
 
 .slot {
@@ -19,10 +35,52 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative; /* Изменено с absolute на relative */
-    transition: all 0.3s ease; /* Добавляем плавную анимацию для слотов */
+    position: relative;
+    transition: all 0.3s ease;
 }
 
+/* Псевдоэлемент для ауры подсвечивания */
+.slot::before {
+    content: '';
+    position: absolute;
+    top: -5px; /* Сдвиг вверх */
+    left: -5px; /* Сдвиг влево */
+    right: -5px; /* Сдвиг вправо */
+    bottom: -5px; /* Сдвиг вниз */
+    border-radius: 12px; /* Скругление углов */
+    background-color: rgba(255, 165, 0, 0.3); /* Оранжевая аура */
+    opacity: 0; /* По умолчанию скрыто */
+    transition: opacity 0.3s ease; /* Плавный переход */
+}
+
+/* Подсветка при наведении или в режиме защиты */
+.slot.highlight::before,
+.slot.defend-highlight::before {
+    opacity: 1; /* Показываем ауру при наведении или в режиме защиты */
+}
+
+.covered-slot {
+    width: 125px;
+    height: 188px;
+    border: 2px dashed rgba(255, 165, 0, 0.3); /* Добавляем границу для видимости */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.covered-card-image {
+    width: 125px;
+    height: 188px;
+    object-fit: contain;
+    transition: all 0.3s ease;
+    border-radius: 8px; /* Добавляем скругление углов */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень для объема */
+}
+
+/* Остальные стили остаются без изменений */
 .slot-inner {
     width: 100px;
     height: 160px;
@@ -39,6 +97,11 @@
     pointer-events: none;
 }
 
+/* В режиме защиты слоты должны реагировать на наведение */
+.defend .slot.occupied {
+    pointer-events: auto;
+}
+
 /* Анимация появления нового слота */
 .slot.new-slot {
     animation: fadeIn 0.3s ease-out;
@@ -53,4 +116,38 @@
         opacity: 1;
         transform: translateX(0);
     }
+}
+
+.empty-covered-slot {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 165, 0, 0.05);
+  border-radius: 8px;
+}
+
+.defend-hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 10px;
+}
+
+/* Анимация для привлечения внимания в режиме защиты */
+.defend .empty-covered-slot {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: rgba(255, 165, 0, 0.05);
+  }
+  50% {
+    background-color: rgba(255, 165, 0, 0.15);
+  }
+  100% {
+    background-color: rgba(255, 165, 0, 0.05);
+  }
 }
