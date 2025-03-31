@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { deckService } from '../../services/DeckService';
+import useGameStore from '../../services/gameStore';
 import './Card.css';
 
 const Card = ({ cardId, index, onPlaced }) => {
@@ -9,6 +10,9 @@ const Card = ({ cardId, index, onPlaced }) => {
   const [isInSlot, setIsInSlot] = useState(false);
   const [slotIndex, setSlotIndex] = useState(null);
   const cardRef = useRef(null);
+  
+  // Получаем текущий режим из Zustand
+  const mode = useGameStore(state => state.mode);
   
   const card = deckService.getCardById(cardId);
   
@@ -26,7 +30,8 @@ const Card = ({ cardId, index, onPlaced }) => {
   }, [index]);
   
   const handleMouseDown = (e) => {
-    if (isInSlot) return; // Если карта в слоте, игнорируем попытку перетаскивания
+    // В режиме защиты нельзя перетаскивать карты в слоты
+    if (isInSlot || mode === 'defend') return;
     
     e.preventDefault();
     const rect = cardRef.current.getBoundingClientRect();
@@ -50,6 +55,9 @@ const Card = ({ cardId, index, onPlaced }) => {
   };
   
   const highlightSlot = (x, y) => {
+    // В режиме защиты не подсвечиваем слоты
+    if (mode === 'defend') return;
+    
     const slots = document.querySelectorAll('.slot:not(.occupied)');
     const cardRect = cardRef.current.getBoundingClientRect();
 

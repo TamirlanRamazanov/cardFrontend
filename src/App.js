@@ -1,44 +1,45 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './App.css';
 import Card from './components/Card/Card';
 import Table from './Table/Table';
 import SlotsContainer from './components/Slot/SlotsContainer';
 import { deckService } from './services/DeckService';
+import useGameStore from './services/gameStore';
 
 function App() {
-  const [mode, setMode] = useState('attack');
-  const [activeCards, setActiveCards] = useState([]);
-  const [occupiedSlots, setOccupiedSlots] = useState(0);
+  const { 
+    mode, 
+    activeCards, 
+    occupiedSlots, 
+    toggleMode, 
+    addCard, 
+    incrementOccupiedSlots 
+  } = useGameStore();
   
   const handleDrawCard = () => {
     try {
       const newCard = deckService.drawCard();
       if (newCard) {
-        setActiveCards(prev => [...prev, newCard]);
+        addCard(newCard);
       }
     } catch (error) {
       console.error('Error drawing card:', error);
     }
   };
 
-  const handleCardPlaced = () => {
-    setOccupiedSlots(prev => Math.min(prev + 1, 6));
-  };
-
-  const toggleMode = () => {
-    setMode(mode === 'attack' ? 'defend' : 'attack');
-  };
-
   return (
     <div className="container">
       <Table />
-      <SlotsContainer occupiedSlots={occupiedSlots} />
+      <SlotsContainer 
+        occupiedSlots={occupiedSlots} 
+        mode={mode}
+      />
       {activeCards.map((card, index) => (
         <Card 
           key={card.id} 
           cardId={card.id} 
           index={index}
-          onPlaced={handleCardPlaced}
+          onPlaced={incrementOccupiedSlots}
         />
       ))}
       <div className="buttons-container">
@@ -56,4 +57,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
