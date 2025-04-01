@@ -13,6 +13,9 @@ const SlotsContainer = ({ occupiedSlots, mode }) => {
   // Проверяем, есть ли покрытые карты
   const hasCoveredCards = Object.keys(coveredCards).length > 0;
 
+  // Проверяем, есть ли карты в нижних слотах
+  const hasCardsInCoveredSlots = Object.keys(coveredCards).some(cardId => cardId !== undefined);
+
   useEffect(() => {
     // В режиме атаки показываем новый слот, когда предыдущий занят
     if (mode === 'attack') {
@@ -32,7 +35,7 @@ const SlotsContainer = ({ occupiedSlots, mode }) => {
   console.log("Has covered cards:", hasCoveredCards);
 
   return (
-    <div className={`slots-container ${hasCoveredCards ? 'has-covered-cards-visible' : ''}`}>
+    <div className={`slots-container ${!hasCardsInCoveredSlots ? 'empty-bottom' : ''}`}>
       {/* Основные слоты для карт */}
       <div className="main-slots">
         {[...Array(visibleSlots)].map((_, index) => (
