@@ -12,7 +12,7 @@ const Card = ({ cardId, index, onPlaced }) => {
   const cardRef = useRef(null);
   
   // Получаем данные из Zustand
-  const { mode, coverCard, removeActiveCard, isSlotCovered } = useGameStore();
+  const { mode, coverCard, removeActiveCard, isSlotCovered, canPlaceCardInDefendMode } = useGameStore();
   
   const card = deckService.getCardById(cardId);
   
@@ -55,6 +55,10 @@ const Card = ({ cardId, index, onPlaced }) => {
     if (mode === 'attack') {
       highlightEmptySlot(newX, newY);
     } else if (mode === 'defend') {
+      if (canPlaceCardInDefendMode()) {
+        highlightEmptySlot(newX, newY);
+      }
+      // Всегда проверяем возможность покрытия карт
       highlightOccupiedSlot(newX, newY);
     }
   };
@@ -118,19 +122,36 @@ const Card = ({ cardId, index, onPlaced }) => {
         slot.appendChild(cardRef.current.parentElement);
       }
     } else if (mode === 'defend') {
-      const slot = document.querySelector('.slot.defend-highlight');
-      if (slot) {
-        // Получаем индекс слота среди всех слотов
-        const index = parseInt(slot.getAttribute('data-slot-index'));
-        
-        // Добавляем карту как покрытие
-        coverCard(index, cardId);
-        
-        // Удаляем карту из активных (она теперь покрытие)
-        removeActiveCard(cardId);
-        
-        // Убираем подсветку
-        slot.classList.remove('defend-highlight');
+      // Сначала проверяем возможность размещения в main slots
+      if (canPlaceCardInDefendMode()) {
+        const slot = document.querySelector('.slot.highlight');
+        if (slot) {
+          const index = parseInt(slot.getAttribute('data-slot-index'));
+          setSlotIndex(index);
+          setIsInSlot(true);
+          onPlaced();
+          slot.classList.remove('highlight');
+          slot.classList.add('occupied');
+          slot.appendChild(cardRef.current.parentElement);
+        } else {
+          // Если не удалось разместить в main slot, пробуем покрыть карту
+          const defendSlot = document.querySelector('.slot.defend-highlight');
+          if (defendSlot) {
+            const index = parseInt(defendSlot.getAttribute('data-slot-index'));
+            coverCard(index, cardId);
+            removeActiveCard(cardId);
+            defendSlot.classList.remove('defend-highlight');
+          }
+        }
+      } else {
+        // Если нельзя размещать в main slots, пробуем только покрыть карту
+        const defendSlot = document.querySelector('.slot.defend-highlight');
+        if (defendSlot) {
+          const index = parseInt(defendSlot.getAttribute('data-slot-index'));
+          coverCard(index, cardId);
+          removeActiveCard(cardId);
+          defendSlot.classList.remove('defend-highlight');
+        }
       }
     }
 

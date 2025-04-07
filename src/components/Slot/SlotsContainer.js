@@ -25,10 +25,16 @@ const SlotsContainer = ({ occupiedSlots, mode }) => {
         setVisibleSlots(1);
       }
     } else {
-      // В режиме защиты показываем только занятые слоты
-      setVisibleSlots(occupiedSlots);
+      // В режиме защиты показываем слоты в зависимости от условий
+      if (occupiedSlots > 0 && Object.keys(coveredCards).length === 0 && occupiedSlots < MAX_SLOTS) {
+        // Если есть карты в основных слотах, нет покрытых карт и не достигнут максимум
+        setVisibleSlots(occupiedSlots + 1);
+      } else {
+        // В остальных случаях показываем только занятые слоты
+        setVisibleSlots(occupiedSlots);
+      }
     }
-  }, [occupiedSlots, mode]);
+  }, [occupiedSlots, mode, coveredCards]);
 
   // Отладочная информация
   console.log("Covered cards:", coveredCards);
@@ -42,7 +48,7 @@ const SlotsContainer = ({ occupiedSlots, mode }) => {
           <Slot
             key={index}
             isOccupied={index < occupiedSlots}
-            className={`slot ${index === visibleSlots - 1 && mode === 'attack' ? 'new-slot' : ''}`}
+            className={`slot ${index === visibleSlots - 1 && (mode === 'attack' || mode === 'defend') ? 'new-slot' : ''}`}
             slotIndex={index}
           />
         ))}

@@ -1,14 +1,29 @@
 import React from 'react';
+import useGameStore from '../../services/gameStore';
 import './Slot.css';
 
 const Slot = ({ isOccupied, className, slotIndex }) => {
+    const { mode } = useGameStore();
+    
+    // Определяем, является ли этот слот последним видимым в режиме защиты
+    const isLastEmptySlotInDefendMode = mode === 'defend' && !isOccupied && 
+        className && className.includes('new-slot');
+    
     return (
         <div
             className={`slot ${isOccupied ? 'occupied' : ''} ${className || ''}`}
             data-slot="true"
             data-slot-index={slotIndex}
         >
-            <div className="slot-inner"></div>
+            {isLastEmptySlotInDefendMode ? (
+                <img 
+                    src={`${process.env.PUBLIC_URL}/reverse-sign.png`}
+                    alt="Reverse sign"
+                    className="reverse-sign"
+                />
+            ) : (
+                <div className="slot-inner"></div>
+            )}
         </div>
     );
 };

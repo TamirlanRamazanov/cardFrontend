@@ -47,6 +47,21 @@ const useGameStore = create((set, get) => ({
   removeActiveCard: (cardId) => set((state) => ({
     activeCards: state.activeCards.filter(card => card.id !== cardId)
   })),
+
+  // Новые вспомогательные функции для проверки условий размещения карт
+  canPlaceCardInDefendMode: () => {
+    const state = get();
+    // Проверяем, есть ли хотя бы одна карта в coveredCards
+    const hasCoveredCards = Object.values(state.coveredCards).some(cardId => cardId !== undefined);
+    return state.mode === 'defend' && 
+           state.occupiedSlots > 0 && 
+           !hasCoveredCards;
+  },
+
+  hasEmptyMainSlots: () => {
+    const state = get();
+    return state.occupiedSlots < 6;
+  }
 }));
 
 export default useGameStore;
