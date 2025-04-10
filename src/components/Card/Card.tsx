@@ -3,16 +3,27 @@ import { deckService } from '../../services/DeckService';
 import useGameStore from '../../services/gameStore';
 import './Card.css';
 
-const Card = ({ cardId, index, onPlaced }) => {
-  const [position, setPosition] = useState(null);
+interface CardProps {
+  cardId: number;
+  index: number;
+  onPlaced: () => void;
+}
+
+interface Position {
+  x: number;
+  y: number;
+}
+
+const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
+  const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isInSlot, setIsInSlot] = useState(false);
-  const [slotIndex, setSlotIndex] = useState(null);
-  const cardRef = useRef(null);
+  const [slotIndex, setSlotIndex] = useState<number | null>(null);
+  const cardRef = useRef<HTMLImageElement>(null);
   
   // Получаем данные из Zustand
-  const { mode, coverCard, removeActiveCard, isSlotCovered, canPlaceCardInDefendMode } = useGameStore();
+  const { mode, coverCard, removeActiveCard, isSlotCovered, canPlaceCardInDefendMode, getCardById } = useGameStore();
   
   const card = deckService.getCardById(cardId);
   
@@ -29,12 +40,13 @@ const Card = ({ cardId, index, onPlaced }) => {
     });
   }, [index]);
   
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLImageElement>) => {
     // Разрешаем перетаскивание карт в любом режиме, но запрещаем для карт в слотах
     if (isInSlot) return;
     
     e.preventDefault();
-    const rect = cardRef.current.getBoundingClientRect();
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
     
     // Вычисляем смещение относительно точки клика внутри карты
     const offsetX = e.clientX - rect.left;
@@ -44,8 +56,8 @@ const Card = ({ cardId, index, onPlaced }) => {
     setIsDragging(true);
   };
   
-  const handleMouseMove = (e) => {
-    if (!isDragging || isInSlot) return;
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || isInSlot || !cardRef.current) return;
 
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
@@ -63,8 +75,10 @@ const Card = ({ cardId, index, onPlaced }) => {
     }
   };
   
-  const highlightEmptySlot = (x, y) => {
+  const highlightEmptySlot = (x: number, y: number) => {
     const slots = document.querySelectorAll('.slot:not(.occupied)');
+    if (!cardRef.current) return;
+    
     const cardRect = cardRef.current.getBoundingClientRect();
 
     slots.forEach(slot => {
@@ -80,8 +94,10 @@ const Card = ({ cardId, index, onPlaced }) => {
     });
   };
   
-  const highlightOccupiedSlot = (x, y) => {
+  const highlightOccupiedSlot = (x: number, y: number) => {
     const slots = document.querySelectorAll('.slot.occupied');
+    if (!cardRef.current || !card) return;
+    
     const cardRect = cardRef.current.getBoundingClientRect();
 
     slots.forEach(slot => {
@@ -94,24 +110,40 @@ const Card = ({ cardId, index, onPlaced }) => {
       );
       
       // Получаем индекс слота
-      const slotIndex = parseInt(slot.getAttribute('data-slot-index'));
+      const slotIndex = parseInt(slot.getAttribute('data-slot-index') || '0');
       
       // Проверяем, не покрыт ли уже этот слот
       const isCovered = isSlotCovered(slotIndex);
+
+      // Получаем ID карты в слоте
+      const slotCardElement = slot.querySelector('.card-image');
+      let canCover = false;
+
+      if (slotCardElement) {
+        // Получаем ID карты из атрибута data-card-id
+        const slotCardId = parseInt(slotCardElement.getAttribute('data-card-id') || '0');
+        const slotCard = getCardById(slotCardId);
+        
+        // Проверяем мощность карт
+        if (slotCard && card) {
+          // Можно покрыть только если power текущей карты больше power карты в слоте
+          canCover = card.power >= slotCard.power;
+        }
+      }
       
-      // Подсвечиваем только если слот не покрыт
-      slot.classList.toggle('defend-highlight', isOver && !isCovered);
+      // Подсвечиваем только если слот не покрыт и мощность покрывающей карты больше
+      slot.classList.toggle('defend-highlight', isOver && !isCovered && canCover);
     });
   };
   
   const handleMouseUp = () => {
-    if (!isDragging) return;
+    if (!isDragging || !card) return;
 
     if (mode === 'attack') {
       const slot = document.querySelector('.slot.highlight');
-      if (slot) {
+      if (slot && cardRef.current) {
         // Получаем индекс слота среди всех слотов
-        const index = parseInt(slot.getAttribute('data-slot-index'));
+        const index = parseInt(slot.getAttribute('data-slot-index') || '0');
         setSlotIndex(index);
         setIsInSlot(true);
         onPlaced();
@@ -119,25 +151,32 @@ const Card = ({ cardId, index, onPlaced }) => {
         slot.classList.add('occupied');
         
         // Перемещаем карту внутрь слота
-        slot.appendChild(cardRef.current.parentElement);
+        const parentElement = cardRef.current.parentElement;
+        if (parentElement) {
+          slot.appendChild(parentElement);
+        }
       }
     } else if (mode === 'defend') {
       // Сначала проверяем возможность размещения в main slots
       if (canPlaceCardInDefendMode()) {
         const slot = document.querySelector('.slot.highlight');
-        if (slot) {
-          const index = parseInt(slot.getAttribute('data-slot-index'));
+        if (slot && cardRef.current) {
+          const index = parseInt(slot.getAttribute('data-slot-index') || '0');
           setSlotIndex(index);
           setIsInSlot(true);
           onPlaced();
           slot.classList.remove('highlight');
           slot.classList.add('occupied');
-          slot.appendChild(cardRef.current.parentElement);
+          
+          const parentElement = cardRef.current.parentElement;
+          if (parentElement) {
+            slot.appendChild(parentElement);
+          }
         } else {
           // Если не удалось разместить в main slot, пробуем покрыть карту
           const defendSlot = document.querySelector('.slot.defend-highlight');
           if (defendSlot) {
-            const index = parseInt(defendSlot.getAttribute('data-slot-index'));
+            const index = parseInt(defendSlot.getAttribute('data-slot-index') || '0');
             coverCard(index, cardId);
             removeActiveCard(cardId);
             defendSlot.classList.remove('defend-highlight');
@@ -147,7 +186,7 @@ const Card = ({ cardId, index, onPlaced }) => {
         // Если нельзя размещать в main slots, пробуем только покрыть карту
         const defendSlot = document.querySelector('.slot.defend-highlight');
         if (defendSlot) {
-          const index = parseInt(defendSlot.getAttribute('data-slot-index'));
+          const index = parseInt(defendSlot.getAttribute('data-slot-index') || '0');
           coverCard(index, cardId);
           removeActiveCard(cardId);
           defendSlot.classList.remove('defend-highlight');
@@ -184,6 +223,7 @@ const Card = ({ cardId, index, onPlaced }) => {
         className={`card-image ${isInSlot ? 'in-slot' : ''} ${isDragging ? 'dragging' : ''}`}
         src={`${process.env.PUBLIC_URL}/assets/cards/${card.image}`}
         alt={card.name}
+        data-card-id={card.id}
         style={{
           ...(isInSlot ? {} : {
             left: `${position.x}px`,

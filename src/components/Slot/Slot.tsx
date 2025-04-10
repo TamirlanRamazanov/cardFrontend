@@ -2,7 +2,13 @@ import React from 'react';
 import useGameStore from '../../services/gameStore';
 import './Slot.css';
 
-const Slot = ({ isOccupied, className, slotIndex }) => {
+interface SlotProps {
+    isOccupied: boolean;
+    className?: string;
+    slotIndex: number;
+}
+
+const Slot: React.FC<SlotProps> = ({ isOccupied, className, slotIndex }) => {
     const { mode } = useGameStore();
     
     // Определяем, является ли этот слот последним видимым в режиме защиты

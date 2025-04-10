@@ -1,8 +1,8 @@
 import React from 'react';
 import './App.css';
-import Card from './components/Card/Card';
-import Table from './Table/Table';
-import SlotsContainer from './components/Slot/SlotsContainer';
+import Card from './components/Card';
+import Table from './components/Table';
+import { SlotsContainer } from './components/Slot';
 import { deckService } from './services/DeckService';
 import useGameStore from './services/gameStore';
 
@@ -29,19 +29,20 @@ function App() {
 
   return (
     <div className="container">
-      <Table />
-      <SlotsContainer 
-        occupiedSlots={occupiedSlots} 
-        mode={mode}
-      />
-      {activeCards.map((card, index) => (
-        <Card 
-          key={card.id} 
-          cardId={card.id} 
-          index={index}
-          onPlaced={incrementOccupiedSlots}
+      <Table>
+        <SlotsContainer 
+          occupiedSlots={occupiedSlots} 
+          mode={mode}
         />
-      ))}
+      </Table>
+        {activeCards.map((card: any, index: number) => (
+          <Card 
+            key={card.id} 
+            cardId={card.id} 
+            index={index}
+            onPlaced={incrementOccupiedSlots}
+          />
+        ))}
       <div className="buttons-container">
         <button className="draw-button" onClick={handleDrawCard}>
           Draw Card

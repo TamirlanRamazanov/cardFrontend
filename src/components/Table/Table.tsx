@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import './Table.css';
 
-const Table = ({ children }) => {
+interface TableProps {
+  children?: ReactNode;
+}
+
+const Table: React.FC<TableProps> = ({ children }) => {
   const [dimensions, setDimensions] = useState({
     width: 0,
     height: 0

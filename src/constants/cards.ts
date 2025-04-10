@@ -1,4 +1,6 @@
-export const FACTIONS = {
+import { Card } from '../services/DeckService';
+
+export const FACTIONS: { [key: number]: string } = {
   1: "Roger's Pirates",
   2: "Whitebeard's Pirates",
   3: "Yonko",
@@ -25,7 +27,7 @@ export const FACTIONS = {
   24: "Blackbeard's Pirates"
 };
 
-export const CARDS_DATA = [
+export const CARDS_DATA: Card[] = [
   {
     id: 1,
     name: "Gol D Roger",
@@ -450,28 +452,38 @@ export const CARDS_DATA = [
 ];
 
 // Вспомогательные функции для работы с картами
-export const getCardFactions = (card) => {
+export const getCardFactions = (card: Card): string[] => {
   return card.factions.map(factionId => FACTIONS[factionId]);
 };
 
-export const getCardsByFaction = (factionId) => {
+export const getCardsByFaction = (factionId: number): Card[] => {
   return CARDS_DATA.filter(card => card.factions.includes(factionId));
 };
 
-export const getCardById = (cardId) => {
+export const getCardById = (cardId: number): Card | undefined => {
   return CARDS_DATA.find(card => card.id === cardId);
 };
 
 // Можно добавить и другие полезные функции
-export const sortCardsByPower = (cards) => {
+export const sortCardsByPower = (cards: Card[]): Card[] => {
   return [...cards].sort((a, b) => b.power - a.power);
 };
 
-export const filterCardsByMinPower = (minPower) => {
+export const filterCardsByMinPower = (minPower: number): Card[] => {
   return CARDS_DATA.filter(card => card.power >= minPower);
 };
 
-export const CARDS = {
+interface CardData {
+  id: number;
+  name: string;
+  image: string;
+  stats: {
+    attack: number;
+    defense: number;
+  }
+}
+
+export const CARDS: { [key: string]: CardData } = {
   PRIME_RAYLEIGH: {
     id: 1,
     name: 'PrimeRayleigh',
@@ -483,9 +495,3 @@ export const CARDS = {
   },
   // другие карты
 };
-
-export const CARD_TYPES = {
-  CHARACTER: 'character',
-  SPELL: 'spell',
-  TRAP: 'trap',
-}; 
