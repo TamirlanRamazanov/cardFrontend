@@ -45,10 +45,6 @@ const SlotsContainer: React.FC<SlotsContainerProps> = ({ occupiedSlots, mode }) 
     }
   }, [occupiedSlots, mode, coveredCards]);
 
-  // Отладочная информация
-  console.log("Covered cards:", coveredCards);
-  console.log("Has covered cards:", hasCoveredCards);
-
   return (
     <div className={`slots-container ${!hasCardsInCoveredSlots ? 'empty-bottom' : ''}`}>
       {/* Основные слоты для карт */}
@@ -89,6 +85,7 @@ const SlotsContainer: React.FC<SlotsContainerProps> = ({ occupiedSlots, mode }) 
                   className="covered-card-image"
                   src={`${process.env.PUBLIC_URL}/assets/cards/${card.image}`}
                   alt={`Covered card ${card.name || index}`}
+                  data-card-id={card.id}
                 />
               ) : (
                 <div className="empty-covered-slot">

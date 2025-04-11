@@ -47,8 +47,36 @@
   left: unset !important;
   top: unset !important;
   transform: none !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 .card-image.dragging {
   z-index: 1100 !important;
+}
+
+/* Стиль для фиолетовой ауры при соединении карт */
+.card-image.faction-connect-highlight {
+  box-shadow: 0 0 15px 8px rgba(128, 0, 255, 0.6);
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Пульсирующая анимация для карт с активным соединением */
+@keyframes pulse-connection {
+  0% {
+    box-shadow: 0 0 10px 5px rgba(128, 0, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(128, 0, 255, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 10px 5px rgba(128, 0, 255, 0.5);
+  }
+}
+
+.card-image.faction-connect-active {
+  animation: pulse-connection 1.5s infinite;
+  border-radius: 8px;
 } 

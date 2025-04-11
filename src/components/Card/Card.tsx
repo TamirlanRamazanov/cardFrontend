@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { deckService } from '../../services/DeckService';
 import useGameStore from '../../services/gameStore';
+import { factionManager } from '../../services/factionManager';
 import './Card.css';
 
 interface CardProps {
@@ -20,6 +21,8 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isInSlot, setIsInSlot] = useState(false);
   const [slotIndex, setSlotIndex] = useState<number | null>(null);
+  const [connectionTarget, setConnectionTarget] = useState<number | null>(null);
+  const [isOverReverseSlot, setIsOverReverseSlot] = useState(false);
   const cardRef = useRef<HTMLImageElement>(null);
   
   // Получаем данные из Zustand
@@ -57,7 +60,7 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
   };
   
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || isInSlot || !cardRef.current) return;
+    if (!isDragging || isInSlot || !cardRef.current || !card) return;
 
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
@@ -65,14 +68,68 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     setPosition({ x: newX, y: newY });
     
     if (mode === 'attack') {
-      highlightEmptySlot(newX, newY);
-    } else if (mode === 'defend') {
-      if (canPlaceCardInDefendMode()) {
+      // В режиме атаки проверяем соединение с существующими картами
+      checkCardConnection(newX, newY, true);
+      
+      // Если нет активных фракций, можно использовать пустой слот для первой карты
+      if (factionManager.getActiveFactions().length === 0) {
         highlightEmptySlot(newX, newY);
       }
+    } else if (mode === 'defend') {
+      // В режиме защиты проверяем, можно ли добавить карту через reverse-слот
+      highlightReverseSlot(newX, newY);
+      
       // Всегда проверяем возможность покрытия карт
       highlightOccupiedSlot(newX, newY);
     }
+  };
+  
+  // Проверка соединения карты с существующими картами
+  const checkCardConnection = (x: number, y: number, shouldHighlight: boolean = false) => {
+    if (!card) return false;
+    
+    // Удаляем предыдущую подсветку
+    document.querySelectorAll('.card-image.faction-connect-highlight, .covered-card-image.faction-connect-highlight').forEach(el => {
+      el.classList.remove('faction-connect-highlight');
+    });
+    
+    // Сбрасываем текущую цель соединения
+    setConnectionTarget(null);
+    
+    // Получаем все карты в слотах (как в main slots, так и в covered slots)
+    const mainSlotCards = document.querySelectorAll('.slot.occupied .card-image');
+    const coveredSlotCards = document.querySelectorAll('.covered-slot .covered-card-image');
+    
+    const allCards = [...Array.from(mainSlotCards), ...Array.from(coveredSlotCards)];
+    if (!cardRef.current) return false;
+
+    const cardRect = cardRef.current.getBoundingClientRect();
+    
+    for (const targetCard of allCards) {
+      const targetRect = targetCard.getBoundingClientRect();
+      const isOver = (
+        cardRect.right > targetRect.left &&
+        cardRect.left < targetRect.right &&
+        cardRect.bottom > targetRect.top &&
+        cardRect.top < targetRect.bottom
+      );
+      
+      if (isOver) {
+        const targetCardId = parseInt(targetCard.getAttribute('data-card-id') || '0');
+        
+        // Проверяем, можно ли соединить карты по фракциям
+        if (factionManager.shouldHighlightForConnection(card, targetCardId)) {
+          // Добавляем подсветку в режиме атаки или при shouldHighlight = true
+          if (shouldHighlight) {
+            targetCard.classList.add('faction-connect-highlight');
+          }
+          setConnectionTarget(targetCardId);
+          return true;
+        }
+      }
+    }
+    
+    return false;
   };
   
   const highlightEmptySlot = (x: number, y: number) => {
@@ -92,6 +149,31 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
       
       slot.classList.toggle('highlight', isOver);
     });
+  };
+  
+  // Подсветка reverse-слота в режиме defend
+  const highlightReverseSlot = (x: number, y: number) => {
+    const reverseSlot = document.querySelector('.slot.new-slot');
+    if (!cardRef.current || !card || !reverseSlot) {
+      setIsOverReverseSlot(false);
+      return;
+    }
+    
+    const cardRect = cardRef.current.getBoundingClientRect();
+    const slotRect = reverseSlot.getBoundingClientRect();
+    
+    const isOver = (
+      cardRect.right > slotRect.left &&
+      cardRect.left < slotRect.right &&
+      cardRect.bottom > slotRect.top &&
+      cardRect.top < slotRect.bottom
+    );
+    
+    // Проверяем, что карта имеет хотя бы одну из активных фракций
+    const canAddCard = factionManager.hasActiveFactionsInCard(card);
+    
+    setIsOverReverseSlot(isOver && canAddCard);
+    reverseSlot.classList.toggle('reverse-highlight', isOver && canAddCard);
   };
   
   const highlightOccupiedSlot = (x: number, y: number) => {
@@ -140,53 +222,120 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     if (!isDragging || !card) return;
 
     if (mode === 'attack') {
-      const slot = document.querySelector('.slot.highlight');
-      if (slot && cardRef.current) {
-        // Получаем индекс слота среди всех слотов
-        const index = parseInt(slot.getAttribute('data-slot-index') || '0');
-        setSlotIndex(index);
-        setIsInSlot(true);
-        onPlaced();
-        slot.classList.remove('highlight');
-        slot.classList.add('occupied');
+      // При наличии цели соединения, обрабатываем соединение
+      if (connectionTarget !== null) {
+        // Обновляем фракции через соединение
+        const success = factionManager.updateFactionsOnConnection(card, connectionTarget);
         
-        // Перемещаем карту внутрь слота
-        const parentElement = cardRef.current.parentElement;
-        if (parentElement) {
-          slot.appendChild(parentElement);
+        if (success) {
+          // Ищем первый свободный слот и помещаем карту туда
+          const slot = document.querySelector('.slot:not(.occupied)');
+          if (slot && cardRef.current) {
+            const index = parseInt(slot.getAttribute('data-slot-index') || '0');
+            setSlotIndex(index);
+            setIsInSlot(true);
+            
+            // Добавляем карту в main slot
+            factionManager.addCardToMainSlot(card, index);
+            
+            onPlaced();
+            slot.classList.remove('highlight');
+            slot.classList.add('occupied');
+            
+            // Перемещаем карту внутрь слота
+            const parentElement = cardRef.current.parentElement;
+            if (parentElement) {
+              slot.appendChild(parentElement);
+            }
+          }
         }
-      }
-    } else if (mode === 'defend') {
-      // Сначала проверяем возможность размещения в main slots
-      if (canPlaceCardInDefendMode()) {
+      } else if (factionManager.getActiveFactions().length === 0) {
+        // Если это первая карта (нет активных фракций), можно положить в пустой слот
         const slot = document.querySelector('.slot.highlight');
         if (slot && cardRef.current) {
           const index = parseInt(slot.getAttribute('data-slot-index') || '0');
           setSlotIndex(index);
           setIsInSlot(true);
+          
+          // Добавляем карту в main slot и устанавливаем её фракции как активные
+          factionManager.addCardToMainSlot(card, index);
+          
           onPlaced();
           slot.classList.remove('highlight');
           slot.classList.add('occupied');
           
+          // Перемещаем карту внутрь слота
           const parentElement = cardRef.current.parentElement;
           if (parentElement) {
             slot.appendChild(parentElement);
           }
-        } else {
-          // Если не удалось разместить в main slot, пробуем покрыть карту
-          const defendSlot = document.querySelector('.slot.defend-highlight');
-          if (defendSlot) {
-            const index = parseInt(defendSlot.getAttribute('data-slot-index') || '0');
-            coverCard(index, cardId);
-            removeActiveCard(cardId);
-            defendSlot.classList.remove('defend-highlight');
+        }
+      }
+    } else if (mode === 'defend') {
+      // В режиме защиты сначала проверяем, находимся ли мы над reverse-слотом
+      if (isOverReverseSlot) {
+        // Автоматически проверяем все карты на наличие соединения
+        let foundConnection = false;
+        let targetId = null;
+        
+        // Получаем все карты в слотах (как в main slots, так и в covered slots)
+        const mainSlotCards = document.querySelectorAll('.slot.occupied .card-image');
+        const coveredSlotCards = document.querySelectorAll('.covered-slot .covered-card-image[data-card-id]');
+        
+        const allCards = [...Array.from(mainSlotCards), ...Array.from(coveredSlotCards)];
+        
+        // Пробуем найти карту, с которой можно соединиться
+        for (const targetCard of allCards) {
+          const targetCardId = parseInt(targetCard.getAttribute('data-card-id') || '0');
+          if (targetCardId && factionManager.shouldHighlightForConnection(card, targetCardId)) {
+            foundConnection = true;
+            targetId = targetCardId;
+            break;
           }
         }
+        
+        if (foundConnection && targetId) {
+          // Обновляем активные фракции через соединение
+          factionManager.updateFactionsOnConnection(card, targetId);
+          
+          // Находим свободный слот (кроме reverse-слота)
+          const freeSlots = document.querySelectorAll('.slot:not(.occupied):not(.new-slot)');
+          
+          if (freeSlots.length > 0 && cardRef.current) {
+            const slot = freeSlots[0]; // Берем первый доступный слот
+            const index = parseInt(slot.getAttribute('data-slot-index') || '0');
+            
+            setSlotIndex(index);
+            setIsInSlot(true);
+            
+            // Добавляем карту в main slot
+            factionManager.addCardToMainSlot(card, index);
+            
+            onPlaced();
+            slot.classList.add('occupied');
+            
+            // Перемещаем карту внутрь слота
+            const parentElement = cardRef.current.parentElement;
+            if (parentElement) {
+              slot.appendChild(parentElement);
+            }
+            
+            console.log('Карта добавлена в main slot через reverse слот');
+          } else {
+            console.warn('Нет свободных слотов для размещения карты');
+          }
+        } else {
+          console.warn('Не найдено подходящей карты для соединения');
+        }
       } else {
-        // Если нельзя размещать в main slots, пробуем только покрыть карту
+        // Пробуем покрыть карту
         const defendSlot = document.querySelector('.slot.defend-highlight');
         if (defendSlot) {
           const index = parseInt(defendSlot.getAttribute('data-slot-index') || '0');
+          
+          // Добавляем карту в covered slot и активируем все её фракции
+          factionManager.addCardToCoveredSlot(card, index);
+          
           coverCard(index, cardId);
           removeActiveCard(cardId);
           defendSlot.classList.remove('defend-highlight');
@@ -195,10 +344,14 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     }
 
     setIsDragging(false);
-    // Убираем подсветку со всех слотов
-    document.querySelectorAll('.slot.highlight, .slot.defend-highlight').forEach(s => {
+    setIsOverReverseSlot(false);
+    
+    // Убираем подсветку со всех слотов и карт
+    document.querySelectorAll('.slot.highlight, .slot.defend-highlight, .slot.reverse-highlight, .card-image.faction-connect-highlight, .covered-card-image.faction-connect-highlight').forEach(s => {
       s.classList.remove('highlight');
       s.classList.remove('defend-highlight');
+      s.classList.remove('reverse-highlight');
+      s.classList.remove('faction-connect-highlight');
     });
   };
 
@@ -212,7 +365,7 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, mode]);
+  }, [isDragging, mode, connectionTarget, isOverReverseSlot]);
   
   if (!card || !position) return null;
 

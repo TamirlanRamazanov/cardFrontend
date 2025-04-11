@@ -3,6 +3,7 @@ import './App.css';
 import Card from './components/Card';
 import Table from './components/Table';
 import { SlotsContainer } from './components/Slot';
+import { ActiveFactions } from './components/ActiveFactions';
 import { deckService } from './services/DeckService';
 import useGameStore from './services/gameStore';
 
@@ -29,6 +30,7 @@ function App() {
 
   return (
     <div className="container">
+      <ActiveFactions />
       <Table>
         <SlotsContainer 
           occupiedSlots={occupiedSlots} 

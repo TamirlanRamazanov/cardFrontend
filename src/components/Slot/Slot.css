@@ -85,6 +85,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень для объема */
 }
 
+.covered-card-image.faction-connect-highlight {
+    box-shadow: 0 0 15px 8px rgba(138, 43, 226, 0.6);
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
 /* Остальные стили остаются без изменений */
 .slot-inner {
     width: 100px;
@@ -94,17 +100,33 @@
 }
 
 .slot.highlight {
-    border-color: rgba(255, 255, 255, 0.8);
-    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.3);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
 }
 
 .slot.occupied {
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.1);
     pointer-events: none;
 }
 
 /* В режиме защиты слоты должны реагировать на наведение */
 .defend .slot.occupied {
     pointer-events: auto;
+}
+
+.slot.defend-highlight {
+    border-color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.3);
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+.slot.reverse-highlight {
+    border-color: #8a2be2;
+    background-color: rgba(138, 43, 226, 0.3);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
 }
 
 /* Анимация появления нового слота */
@@ -129,6 +151,7 @@
     object-fit: contain;
     opacity: 0.8;
     transition: all 0.3s ease;
+    animation: pulse 1.5s infinite ease-in-out;
 }
 
 /* Пульсирующая анимация для reverse-sign */
@@ -147,6 +170,26 @@
     }
 }
 
-.reverse-sign {
-    animation: pulse 1.5s infinite ease-in-out;
+.empty-covered-slot {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
+.covered-card-image {
+    width: 110px;
+    height: 165px;
+    object-fit: contain;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.covered-card-image.faction-connect-highlight {
+    box-shadow: 0 0 15px 8px rgba(138, 43, 226, 0.6);
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+

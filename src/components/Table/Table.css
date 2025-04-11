@@ -1,6 +1,6 @@
 .table-container {
   position: fixed;
-  top: 50%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 80vw; /* Используем 90% ширины viewport */
