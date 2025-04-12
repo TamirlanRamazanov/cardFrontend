@@ -367,14 +367,14 @@ export const CARDS_DATA: Card[] = [
   {
     id: 49,
     name: "Mr2 Bentham",
-    power: 60,
+    power: 59,
     factions: [14],
     image: "mr2.png"
   },
   {
     id: 50,
     name: "Marguerite",
-    power: 59,
+    power: 60,
     factions: [13],
     image: "marguerite.png"
   },
