@@ -109,7 +109,7 @@ export const CARDS_DATA: Card[] = [
     id: 13,
     name: "Old Monkey D Garp",
     power: 91,
-    factions: [2, 3],
+    factions: [6, 7, 8],
     image: "oldgarp.png"
   },
   {

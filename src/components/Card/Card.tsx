@@ -218,6 +218,33 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     });
   };
   
+  // Общая функция для размещения карты в main slot
+  const placeCardInMainSlot = (card: any, targetSlot: Element, slotIndex: number) => {
+    if (!cardRef.current) return false;
+    
+    setSlotIndex(slotIndex);
+    setIsInSlot(true);
+    
+    // Добавляем карту в main slot через фракционный менеджер
+    factionManager.addCardToMainSlot(card, slotIndex);
+    
+    // Вызываем колбэк для оповещения родителя о размещении
+    onPlaced();
+    
+    // Удаляем классы подсветки и добавляем occupied
+    targetSlot.classList.remove('highlight', 'reverse-highlight');
+    targetSlot.classList.add('occupied');
+    
+    // Перемещаем карту внутрь слота
+    const parentElement = cardRef.current.parentElement;
+    if (parentElement) {
+      targetSlot.appendChild(parentElement);
+      return true;
+    }
+    
+    return false;
+  };
+
   const handleMouseUp = () => {
     if (!isDragging || !card) return;
 
@@ -230,102 +257,46 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
         if (success) {
           // Ищем первый свободный слот и помещаем карту туда
           const slot = document.querySelector('.slot:not(.occupied)');
-          if (slot && cardRef.current) {
+          if (slot) {
             const index = parseInt(slot.getAttribute('data-slot-index') || '0');
-            setSlotIndex(index);
-            setIsInSlot(true);
-            
-            // Добавляем карту в main slot
-            factionManager.addCardToMainSlot(card, index);
-            
-            onPlaced();
-            slot.classList.remove('highlight');
-            slot.classList.add('occupied');
-            
-            // Перемещаем карту внутрь слота
-            const parentElement = cardRef.current.parentElement;
-            if (parentElement) {
-              slot.appendChild(parentElement);
-            }
+            placeCardInMainSlot(card, slot, index);
           }
         }
       } else if (factionManager.getActiveFactions().length === 0) {
         // Если это первая карта (нет активных фракций), можно положить в пустой слот
         const slot = document.querySelector('.slot.highlight');
-        if (slot && cardRef.current) {
+        if (slot) {
           const index = parseInt(slot.getAttribute('data-slot-index') || '0');
-          setSlotIndex(index);
-          setIsInSlot(true);
-          
-          // Добавляем карту в main slot и устанавливаем её фракции как активные
-          factionManager.addCardToMainSlot(card, index);
-          
-          onPlaced();
-          slot.classList.remove('highlight');
-          slot.classList.add('occupied');
-          
-          // Перемещаем карту внутрь слота
-          const parentElement = cardRef.current.parentElement;
-          if (parentElement) {
-            slot.appendChild(parentElement);
-          }
+          placeCardInMainSlot(card, slot, index);
         }
       }
     } else if (mode === 'defend') {
       // В режиме защиты сначала проверяем, находимся ли мы над reverse-слотом
       if (isOverReverseSlot) {
-        // Автоматически проверяем все карты на наличие соединения
-        let foundConnection = false;
-        let targetId = null;
+        // Проверяем, имеет ли карта хотя бы одну из активных фракций
+        const canAdd = factionManager.hasActiveFactionsInCard(card);
         
-        // Получаем все карты в слотах (как в main slots, так и в covered slots)
-        const mainSlotCards = document.querySelectorAll('.slot.occupied .card-image');
-        const coveredSlotCards = document.querySelectorAll('.covered-slot .covered-card-image[data-card-id]');
-        
-        const allCards = [...Array.from(mainSlotCards), ...Array.from(coveredSlotCards)];
-        
-        // Пробуем найти карту, с которой можно соединиться
-        for (const targetCard of allCards) {
-          const targetCardId = parseInt(targetCard.getAttribute('data-card-id') || '0');
-          if (targetCardId && factionManager.shouldHighlightForConnection(card, targetCardId)) {
-            foundConnection = true;
-            targetId = targetCardId;
-            break;
-          }
-        }
-        
-        if (foundConnection && targetId) {
-          // Обновляем активные фракции через соединение
-          factionManager.updateFactionsOnConnection(card, targetId);
-          
-          // Находим свободный слот (кроме reverse-слота)
-          const freeSlots = document.querySelectorAll('.slot:not(.occupied):not(.new-slot)');
-          
-          if (freeSlots.length > 0 && cardRef.current) {
-            const slot = freeSlots[0]; // Берем первый доступный слот
-            const index = parseInt(slot.getAttribute('data-slot-index') || '0');
+        if (canAdd) {
+          // Находим reverse-слот и размещаем карту в него
+          const reverseSlot = document.querySelector('.slot.new-slot');
+          if (reverseSlot) {
+            const index = parseInt(reverseSlot.getAttribute('data-slot-index') || '0');
             
-            setSlotIndex(index);
-            setIsInSlot(true);
+            // Обновляем активные фракции, оставляя только общие
+            const activeFactions = factionManager.getActiveFactions();
+            const commonFactions = card.factions.filter(faction => activeFactions.includes(faction));
+            factionManager.updateActiveFactions(commonFactions);
             
-            // Добавляем карту в main slot
-            factionManager.addCardToMainSlot(card, index);
+            const success = placeCardInMainSlot(card, reverseSlot, index);
             
-            onPlaced();
-            slot.classList.add('occupied');
-            
-            // Перемещаем карту внутрь слота
-            const parentElement = cardRef.current.parentElement;
-            if (parentElement) {
-              slot.appendChild(parentElement);
+            if (success) {
+              console.log('Карта добавлена в main slot через reverse слот');
             }
-            
-            console.log('Карта добавлена в main slot через reverse слот');
           } else {
-            console.warn('Нет свободных слотов для размещения карты');
+            console.warn('Не найден reverse слот для размещения карты');
           }
         } else {
-          console.warn('Не найдено подходящей карты для соединения');
+          console.warn('Карта не имеет активных фракций');
         }
       } else {
         // Пробуем покрыть карту

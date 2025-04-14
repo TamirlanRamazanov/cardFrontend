@@ -35,6 +35,13 @@ class FactionManager {
   }
 
   /**
+   * Обновляет список активных фракций
+   */
+  public updateActiveFactions(newFactions: number[]): void {
+    this.state.activeFactions = [...newFactions];
+  }
+
+  /**
    * Получить имя фракции по ID
    */
   public getFactionName(factionId: number): string {
