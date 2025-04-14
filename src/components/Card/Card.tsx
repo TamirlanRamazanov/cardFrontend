@@ -89,7 +89,10 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     if (!card) return false;
     
     // Удаляем предыдущую подсветку
-    document.querySelectorAll('.card-image.faction-connect-highlight, .covered-card-image.faction-connect-highlight').forEach(el => {
+    document.querySelectorAll('.slot.faction-connect-highlight').forEach(el => {
+      el.classList.remove('faction-connect-highlight');
+    });
+    document.querySelectorAll('.covered-card-image.faction-connect-highlight').forEach(el => {
       el.classList.remove('faction-connect-highlight');
     });
     
@@ -121,7 +124,17 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
         if (factionManager.shouldHighlightForConnection(card, targetCardId)) {
           // Добавляем подсветку в режиме атаки или при shouldHighlight = true
           if (shouldHighlight) {
-            targetCard.classList.add('faction-connect-highlight');
+            // Для обычных слотов
+            if (targetCard.classList.contains('card-image')) {
+              const parentSlot = targetCard.closest('.slot');
+              if (parentSlot) {
+                parentSlot.classList.add('faction-connect-highlight');
+              }
+            } 
+            // Для covered слотов
+            else if (targetCard.classList.contains('covered-card-image')) {
+              targetCard.classList.add('faction-connect-highlight');
+            }
           }
           setConnectionTarget(targetCardId);
           return true;
@@ -318,7 +331,7 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     setIsOverReverseSlot(false);
     
     // Убираем подсветку со всех слотов и карт
-    document.querySelectorAll('.slot.highlight, .slot.defend-highlight, .slot.reverse-highlight, .card-image.faction-connect-highlight, .covered-card-image.faction-connect-highlight').forEach(s => {
+    document.querySelectorAll('.slot.highlight, .slot.defend-highlight, .slot.reverse-highlight, .slot.faction-connect-highlight, .covered-card-image.faction-connect-highlight').forEach(s => {
       s.classList.remove('highlight');
       s.classList.remove('defend-highlight');
       s.classList.remove('reverse-highlight');
