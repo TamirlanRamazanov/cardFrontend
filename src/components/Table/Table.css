@@ -1,15 +1,16 @@
 .table-container {
   position: fixed;
-  top: 45%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80vw; /* Используем 90% ширины viewport */
+  width: 80vw; /* Используем 80% ширины viewport */
   height: 45.95vw; /* Сохраняем пропорции (656/1141 ≈ 0.517) */
   max-width: 1141px; /* Оригинальная максимальная ширина */
   max-height: 656px; /* Оригинальная максимальная высота */
   z-index: 1;
   pointer-events: none; /* Позволяет кликать через стол на элементы под ним */
   transition: width 0.3s ease-out, height 0.3s ease-out;
+  touch-action: none; /* Предотвращаем стандартные жесты на сенсорных устройствах */
 }
 
 .table-image {
@@ -20,6 +21,9 @@
   top: 0;
   left: 0;
   z-index: 1;
+  -webkit-user-select: none; /* Для Safari */
+  user-select: none;
+  -webkit-touch-callout: none; /* Отключает контекстное меню на iOS */
 }
 
 /* Для экранов с соотношением сторон отличным от 16:9 */
@@ -29,5 +33,31 @@
     height: 90vh;
     max-width: none;
     max-height: none;
+  }
+}
+
+/* Для мобильных устройств в портретной ориентации */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  .table-container {
+    width: 95vw; /* Увеличиваем ширину на маленьких экранах */
+    height: 54.5vw;
+    top: 40%; /* Смещаем стол выше на мобильных устройствах */
+  }
+}
+
+/* Для мобильных устройств в альбомной ориентации */
+@media screen and (max-width: 896px) and (orientation: landscape) {
+  .table-container {
+    width: 85vw;
+    height: 48.85vw;
+    top: 50%;
+  }
+}
+
+/* Для планшетов */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .table-container {
+    width: 85vw;
+    height: 48.85vw;
   }
 } 

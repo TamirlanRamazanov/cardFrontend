@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { factionManager } from '../../services/factionManager';
+import React from 'react';
 import { FACTIONS } from '../../constants/cards';
 import './ActiveFactions.css';
+import { useAppSelector } from '../../store/hooks';
+import { selectActiveFactions } from '../../store/slices/factionSlice';
 
 const ActiveFactions: React.FC = () => {
-  const [activeFactions, setActiveFactions] = useState<number[]>([]);
-
-  // Обновляем активные фракции каждые 500 мс
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveFactions(factionManager.getActiveFactions());
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
+  const activeFactions = useAppSelector(selectActiveFactions);
 
   // Если нет активных фракций, ничего не показываем
   if (activeFactions.length === 0) {
@@ -24,7 +16,7 @@ const ActiveFactions: React.FC = () => {
     <div className="active-factions-container">
       <h4>Active Factions:</h4>
       <ul className="active-factions-list">
-        {activeFactions.map((factionId) => (
+        {activeFactions.map((factionId: number) => (
           <li key={factionId} className="faction-item">
             {FACTIONS[factionId]}
           </li>

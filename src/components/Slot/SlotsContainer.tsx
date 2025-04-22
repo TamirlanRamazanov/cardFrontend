@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Slot from './Slot';
-import useGameStore from '../../services/gameStore';
 import './Slot.css';
 import { deckService } from '../../services/DeckService';
+import { useAppSelector } from '../../store/hooks';
+import { selectCoveredCards } from '../../store/slices/gameSlice';
 
 interface SlotsContainerProps {
   occupiedSlots: number;
   mode: string;
 }
 
-interface GameState {
-  coveredCards: { [key: string]: number };
-}
-
 const MAX_SLOTS = 6;
 
 const SlotsContainer: React.FC<SlotsContainerProps> = ({ occupiedSlots, mode }) => {
   const [visibleSlots, setVisibleSlots] = useState(1);
-  const coveredCards = useGameStore((state: GameState) => state.coveredCards);
+  const coveredCards = useAppSelector(selectCoveredCards);
   
   // Проверяем, есть ли покрытые карты
   const hasCoveredCards = Object.keys(coveredCards).length > 0;

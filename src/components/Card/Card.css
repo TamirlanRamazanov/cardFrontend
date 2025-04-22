@@ -1,63 +1,50 @@
 .card-wrapper {
-  z-index: 1000;
+  position: absolute;
+  transform-origin: center;
+  transition: transform 0.3s ease;
+  z-index: 10;
+  touch-action: none;
 }
 
 .card-wrapper.in-slot {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .card-image {
-  --card-scale: 1;
-  --card-stack-position-x: 10vw;
-  --card-stack-position-y: 85vh;
-
-  width: auto;
-  height: 23vh;
-  position: fixed;
+  position: absolute;
+  width: 8.68vw;
+  height: 13.06vw;
   cursor: grab;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   user-select: none;
-  left: var(--card-stack-position-x);
-  top: var(--card-stack-position-y);
-  transform: translate(-50%, -50%) scale(var(--card-scale));
-  z-index: 1000;
-  transition: transform 0.2s ease-out;
-  pointer-events: auto;
-}
-
-.card-image:active {
-  cursor: grabbing;
-  z-index: 1100;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  z-index: 100;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .card-image.in-slot {
-  pointer-events: none;
-  cursor: default !important;
-  transition: all 0.3s ease;
-  width: 125px !important;
-  height: 188px !important;
-  z-index: 1000 !important;
-  position: relative !important;
-  left: unset !important;
-  top: unset !important;
+  position: relative;
   transform: none !important;
-  object-fit: contain !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  transition: none;
+  cursor: default;
 }
 
 .card-image.dragging {
-  z-index: 1100 !important;
+  cursor: grabbing;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transform: scale(1.03);
 }
 
 /* Стиль для фиолетовой ауры при соединении карт */
-.card-image.faction-connect-highlight {
+.card-image.faction-connect-highlight,
+.slot.faction-connect-highlight,
+.covered-card-image.faction-connect-highlight {
   box-shadow: 0 0 15px 8px rgba(128, 0, 255, 0.6);
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
@@ -79,4 +66,31 @@
 .card-image.faction-connect-active {
   animation: pulse-connection 1.5s infinite;
   border-radius: 8px;
+}
+
+/* Улучшенный эффект наведения для карт */
+.card-image:not(.in-slot):hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Активное состояние для сенсорных устройств */
+.card-image:active {
+  transform: scale(1.03);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Медиа-запрос для сенсорных устройств */
+@media (hover: none) and (pointer: coarse) {
+  .card-image {
+    cursor: default;
+  }
+  
+  .card-image:not(.in-slot) {
+    transform: scale(1.02);
+  }
+  
+  .card-image.dragging {
+    transform: scale(1.05);
+  }
 } 

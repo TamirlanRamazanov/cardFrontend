@@ -8,6 +8,7 @@
     transform: translate(-50%, -50%);
     z-index: 1;
     transition: all 0.3s ease;
+    touch-action: none; /* Для сенсорных устройств */
 }
 
 /* Добавляем новый класс для пустых нижних слотов */
@@ -20,6 +21,7 @@
     gap: 25px; /* Расстояние между слотами */
     justify-content: center; /* Центрируем слоты по ширине */
     align-items: center;
+    touch-action: none; /* Для сенсорных устройств */
 }
 
 .covered-slots {
@@ -29,12 +31,13 @@
     align-items: center;
     /* margin-top: 20px; Добавляем отступ сверху */
     transition: all 0.3s ease;
-    height: 188px; /* Фиксированная высота, равная высоте карты */
+    height: 13.06vw; /* Фиксированная высота, равная высоте карты */
+    touch-action: none; /* Для сенсорных устройств */
 }
 
 .slot {
-    width: 125px;
-    height: 188px;
+    width: 8.68vw;
+    height: 13.06vw;
     border: 2px dashed rgba(255, 255, 255, 0.5);
     border-radius: 10px;
     display: flex;
@@ -42,6 +45,8 @@
     align-items: center;
     position: relative;
     transition: all 0.3s ease;
+    touch-action: none; /* Для сенсорных устройств */
+    overflow: visible; /* Позволяет видеть карту, даже если она выходит за границы слота */
 }
 
 .main-slots.faction-connect-highlight {
@@ -62,6 +67,7 @@
     background-color: rgba(255, 165, 0, 0.3); /* Оранжевая аура */
     opacity: 0; /* По умолчанию скрыто */
     transition: opacity 0.3s ease; /* Плавный переход */
+    pointer-events: none; /* Чтобы аура не мешала взаимодействию */
 }
 
 /* Подсветка при наведении или в режиме защиты */
@@ -71,8 +77,8 @@
 }
 
 .covered-slot {
-    width: 125px;
-    height: 188px;
+    width: 8.68vw;
+    height: 13.06vw;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -80,15 +86,20 @@
     transition: all 0.3s ease;
     border: none;
     background: none;
+    touch-action: none; /* Для сенсорных устройств */
 }
 
 .covered-card-image {
-    width: 125px;
-    height: 188px;
+    width: 8.68vw;
+    height: 13.06vw;
     object-fit: contain;
     transition: all 0.3s ease;
     border-radius: 8px; /* Добавляем скругление углов */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Добавляем тень для объема */
+    -webkit-user-select: none; /* Для Safari */
+    user-select: none;
+    -webkit-touch-callout: none; /* Отключает контекстное меню на iOS */
+    -webkit-tap-highlight-color: transparent; /* Убирает подсветку при тапе на iOS */
 }
 
 .covered-card-image.faction-connect-highlight {
@@ -99,8 +110,8 @@
 
 /* Остальные стили остаются без изменений */
 .slot-inner {
-    width: 100px;
-    height: 160px;
+    width: 6.94vw;
+    height: 11.11vw;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -111,7 +122,18 @@
 }
 
 .slot.occupied {
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.05);
     pointer-events: none;
+}
+
+.slot.occupied .card-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* В режиме защиты слоты должны реагировать на наведение */
@@ -156,12 +178,13 @@
 }
 
 .reverse-sign {
-    width: 60px;
-    height: 60px;
+    width: 4.17vw;
+    height: 4.17vw;
     object-fit: contain;
     opacity: 0.8;
     transition: all 0.3s ease;
     animation: pulse 1.5s infinite ease-in-out;
+    pointer-events: none; /* Чтобы значок не мешал взаимодействию */
 }
 
 /* Пульсирующая анимация для reverse-sign */
@@ -180,9 +203,44 @@
     }
 }
 
-.covered-card-image.faction-connect-highlight {
-    box-shadow: 0 0 15px 8px rgba(138, 43, 226, 0.6);
-    border-radius: 8px;
-    transition: box-shadow 0.3s ease;
+/* Медиа-запрос для сенсорных устройств (мобильные телефоны) */
+/*@media (max-width: 768px) {
+    .slots-container {
+        gap: 20px; Уменьшаем расстояние между слотами для маленьких экранов 
+    }
+    
+    .main-slots, .covered-slots {
+        gap: 15px;  Уменьшаем расстояние между слотами 
+    }
+    
+    .slot, .covered-slot {
+        width: 100px;  Уменьшаем размер слота 
+        height: 150px;
+    }
+    
+    .covered-card-image {
+        width: 100px;
+        height: 150px;
+    }
+    
+    .reverse-sign {
+        width: 40px;
+        height: 40px;
+    }
+}
+    */
+
+/* Дополнительные стили для больших сенсорных устройств (планшеты) */
+/* Увеличиваем область взаимодействия для touch устройств */
+@media (min-width: 769px) and (max-width: 1200px) and (pointer: coarse) {
+    .slot::before, 
+    .slot.defend-highlight::before,
+    .slot.reverse-highlight::before,
+    .slot.faction-connect-highlight {
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+    }
 }
 

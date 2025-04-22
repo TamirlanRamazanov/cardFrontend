@@ -1,6 +1,7 @@
 import React from 'react';
-import useGameStore from '../../services/gameStore';
 import './Slot.css';
+import { useAppSelector } from '../../store/hooks';
+import { selectMode } from '../../store/slices/gameSlice';
 
 interface SlotProps {
     isOccupied: boolean;
@@ -9,7 +10,7 @@ interface SlotProps {
 }
 
 const Slot: React.FC<SlotProps> = ({ isOccupied, className, slotIndex }) => {
-    const { mode } = useGameStore();
+    const mode = useAppSelector(selectMode);
     
     // Определяем, является ли этот слот последним видимым в режиме защиты
     const isLastEmptySlotInDefendMode = mode === 'defend' && !isOccupied && 

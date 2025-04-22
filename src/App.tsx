@@ -1,62 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
-import Card from './components/Card';
-import Table from './components/Table';
-import { SlotsContainer } from './components/Slot';
-import { ActiveFactions } from './components/ActiveFactions';
-import { deckService } from './services/DeckService';
-import useGameStore from './services/gameStore';
+import AppRouter from './components/AppRouter';
+import { useAppDispatch } from './store/hooks';
+import { auth } from './firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase/config';
+import { updateAuthState } from './store/slices/authSlice';
 
 function App() {
-  const { 
-    mode, 
-    activeCards, 
-    occupiedSlots, 
-    toggleMode, 
-    addCard, 
-    incrementOccupiedSlots 
-  } = useGameStore();
-  
-  const handleDrawCard = () => {
-    try {
-      const newCard = deckService.drawCard();
-      if (newCard) {
-        addCard(newCard);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Получаем дополнительную информацию о пользователе из Firestore
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          
+          let userData = { name: 'Пользователь' };
+          if (userDoc.exists()) {
+            userData = userDoc.data() as { name: string };
+          }
+          
+          // Обновляем состояние Redux
+          dispatch(updateAuthState({
+            user: {
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: userData.name
+            },
+            isAuthenticated: true
+          }));
+        } catch (error) {
+          console.error('Error syncing auth state:', error);
+        }
+      } else {
+        // Пользователь вышел, обновляем состояние
+        dispatch(updateAuthState({ user: null, isAuthenticated: false }));
       }
-    } catch (error) {
-      console.error('Error drawing card:', error);
-    }
-  };
+    });
+
+    // Отписываемся при размонтировании
+    return () => unsubscribe();
+  }, [dispatch]);
 
   return (
-    <div className="container">
-      <ActiveFactions />
-      <Table>
-        <SlotsContainer 
-          occupiedSlots={occupiedSlots} 
-          mode={mode}
-        />
-      </Table>
-        {activeCards.map((card: any, index: number) => (
-          <Card 
-            key={card.id} 
-            cardId={card.id} 
-            index={index}
-            onPlaced={incrementOccupiedSlots}
-          />
-        ))}
-      <div className="buttons-container">
-        <button className="draw-button" onClick={handleDrawCard}>
-          Draw Card
-        </button>
-        <button 
-          className={`action-button ${mode}`}
-          onClick={toggleMode}
-        >
-          {mode === 'attack' ? 'Attack' : 'Defend'}
-        </button>
-      </div>
-    </div>
+    <AppRouter />
   );
 }
 
