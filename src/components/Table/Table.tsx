@@ -16,16 +16,13 @@ const Table: React.FC<TableProps> = ({ children }) => {
       const aspectRatio = 1141 / 656;
       const maxWidth = 1141;
       const maxHeight = 656;
-      
-      // Получаем размеры viewport
+
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      
-      // Вычисляем максимально возможные размеры, сохраняя пропорции
+
       let width = Math.min(vw * 0.9, maxWidth);
       let height = width / aspectRatio;
-      
-      // Если высота превышает доступное пространство, пересчитываем от высоты
+
       if (height > vh * 0.9) {
         height = vh * 0.9;
         width = height * aspectRatio;
@@ -37,10 +34,8 @@ const Table: React.FC<TableProps> = ({ children }) => {
       });
     };
 
-    // Инициализация размеров
     updateDimensions();
 
-    // Добавляем слушатель изменения размера окна
     window.addEventListener('resize', updateDimensions);
 
     // Очистка при размонтировании

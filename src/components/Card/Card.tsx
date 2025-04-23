@@ -38,15 +38,13 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
   const mode = useAppSelector(selectMode);
   const activeFactions = useAppSelector(selectActiveFactions);
   
-  // Получаем карту из сервиса
+
   const card = deckService.getCardById(cardId);
-  
-  // Проверяем, имеет ли карта активные фракции
+
   const hasActiveFactionsInCard = useAppSelector(state => 
     card ? selectHasActiveFactionsInCard(state, card) : false
   );
 
-  // Получаем состояние покрытых слотов для использования в highlightOccupiedSlot
   const coveredCards = useAppSelector(selectCoveredCards);
 
   const [position, setPosition] = useState<Position | null>(null);
@@ -57,23 +55,20 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
   const [connectionTarget, setConnectionTarget] = useState<number | null>(null);
   const [isOverReverseSlot, setIsOverReverseSlot] = useState(false);
   const cardRef = useRef<HTMLImageElement>(null);
-  
-  // Устанавливаем начальную позицию карты
+
   useEffect(() => {
     const cardElement = getComputedStyle(document.documentElement);
     const baseX = parseFloat(cardElement.getPropertyValue('--card-stack-position-x'));
     const baseY = parseFloat(cardElement.getPropertyValue('--card-stack-position-y'));
-    
-    // Небольшое смещение каждой следующей карты в стопке
+
     setPosition({
       x: baseX,
-      y: baseY - (index * 2) // Каждая следующая карта немного выше предыдущей
+      y: baseY - (index * 2)
     });
   }, [index]);
   
   const handleMouseDown = (e: React.MouseEvent<HTMLImageElement>) => {
     try {
-      // Разрешаем перетаскивание карт в любом режиме, но запрещаем для карт в слотах
       if (isInSlot) return;
       
       e.preventDefault();
@@ -96,7 +91,7 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
     try {
       if (isInSlot) return;
       
-      e.preventDefault(); // Предотвращаем скролл при перетаскивании
+      e.preventDefault();
       
       const rect = cardRef.current?.getBoundingClientRect();
       if (!rect || e.touches.length === 0 || !cardRef.current || !document.body.contains(cardRef.current)) return;
@@ -123,28 +118,26 @@ const Card: React.FC<CardProps> = ({ cardId, index, onPlaced }) => {
       setPosition({ x: newX, y: newY });
       
       if (mode === 'attack') {
-        // В режиме атаки проверяем соединение с существующими картами
+
         checkCardConnection(newX, newY, true);
         
-        // Если нет активных фракций, можно использовать пустой слот для первой карты
+
         if (activeFactions.length === 0) {
           highlightEmptySlot(newX, newY);
         }
       } else if (mode === 'defend') {
-        // В режиме защиты проверяем, можно ли добавить карту через reverse-слот
+
         highlightReverseSlot(newX, newY);
-        
-        // Всегда проверяем возможность покрытия карт
+
         highlightOccupiedSlot(newX, newY);
       }
     } catch (error) {
       console.error('Error in handleMouseMove:', error);
-      // Сбрасываем состояние перетаскивания при ошибке
+
       setIsDragging(false);
     }
   };
 
-  // Обработчик для сенсорного перетаскивания
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging || isInSlot || !cardRef.current || !card || e.touches.length === 0) return;
 

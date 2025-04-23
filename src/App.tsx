@@ -15,7 +15,6 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Получаем дополнительную информацию о пользователе из Firestore
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           
           let userData = { name: 'Пользователь' };
@@ -23,7 +22,7 @@ function App() {
             userData = userDoc.data() as { name: string };
           }
           
-          // Обновляем состояние Redux
+
           dispatch(updateAuthState({
             user: {
               id: firebaseUser.uid,
@@ -36,12 +35,10 @@ function App() {
           console.error('Error syncing auth state:', error);
         }
       } else {
-        // Пользователь вышел, обновляем состояние
         dispatch(updateAuthState({ user: null, isAuthenticated: false }));
       }
     });
 
-    // Отписываемся при размонтировании
     return () => unsubscribe();
   }, [dispatch]);
 

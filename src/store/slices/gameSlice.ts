@@ -27,17 +27,16 @@ export const gameSlice = createSlice({
       state.mode = action.payload;
     },
     
-    // Переключение режима
+    // Периключение режима
     toggleMode: (state: GameState) => {
       state.mode = state.mode === 'attack' ? 'defend' : 'attack';
     },
     
-    // Добавление карты
+    // Добавление карт
     addCard: (state: GameState, action: PayloadAction<Card>) => {
       state.activeCards.push(action.payload);
     },
     
-    // Инкремент занятых слотов
     incrementOccupiedSlots: (state: GameState) => {
       state.occupiedSlots = Math.min(state.occupiedSlots + 1, 6);
     },
@@ -58,12 +57,11 @@ export const gameSlice = createSlice({
       state.activeCards = state.activeCards.filter((card: Card) => card.id !== action.payload);
     },
     
-    // Сброс стола
     resetTable: (state: GameState) => {
       state.activeCards = [];
       state.occupiedSlots = 0;
       state.coveredCards = {};
-      state.mode = 'attack'; // Сбрасываем режим на "атаку" по умолчанию
+      state.mode = 'attack';
     },
   },
 });
@@ -101,7 +99,6 @@ export const selectCanPlaceCardInDefendMode = (state: RootState) => {
 export const selectHasEmptyMainSlots = (state: RootState) => 
   state.game.occupiedSlots < 6;
 
-// Вспомогательная функция для получения карты по ID (не селектор, т.к. использует внешний сервис)
 export const getCardByIdHelper = (cardId: number) => 
   deckService.getCardById(cardId);
 

@@ -4,6 +4,7 @@ import Login from './Auth/Login';
 import Register from './Auth/Register';
 import ProtectedRoute from './Auth/ProtectedRoute';
 import GamePage from './GamePage';
+import CardInfo from './CardInfo/CardInfo';
 
 const AppRouter: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const AppRouter: React.FC = () => {
             </ProtectedRoute>
           } 
         />
+        <Route path="/cardinfo" element={<CardInfo />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

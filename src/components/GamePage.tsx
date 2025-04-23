@@ -106,9 +106,9 @@ const GamePage: React.FC = () => {
           >
             {mode === 'attack' ? 'Attack' : 'Defend'}
           </button>
-          <button className="reset-button" onClick={handleResetTable}>
-            Reset Table
-          </button>
+          <a href="/CardInfo/CardInfo" className="action-button" style={{ backgroundColor: '#4a90e2' }}>
+            CardInfo
+          </a>
           <button className="logout-button" onClick={handleLogout}>
             Leave
           </button>

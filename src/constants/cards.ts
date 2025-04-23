@@ -481,17 +481,4 @@ interface CardData {
     attack: number;
     defense: number;
   }
-}
-
-export const CARDS: { [key: string]: CardData } = {
-  PRIME_RAYLEIGH: {
-    id: 1,
-    name: 'PrimeRayleigh',
-    image: 'PrimeRayleigh.png',
-    stats: {
-      attack: 100,
-      defense: 90,
-    }
-  },
-  // другие карты
 };

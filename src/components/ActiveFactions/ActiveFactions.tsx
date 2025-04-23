@@ -7,7 +7,6 @@ import { selectActiveFactions } from '../../store/slices/factionSlice';
 const ActiveFactions: React.FC = () => {
   const activeFactions = useAppSelector(selectActiveFactions);
 
-  // Если нет активных фракций, ничего не показываем
   if (activeFactions.length === 0) {
     return null;
   }

@@ -11,8 +11,7 @@ interface SlotProps {
 
 const Slot: React.FC<SlotProps> = ({ isOccupied, className, slotIndex }) => {
     const mode = useAppSelector(selectMode);
-    
-    // Определяем, является ли этот слот последним видимым в режиме защиты
+
     const isLastEmptySlotInDefendMode = mode === 'defend' && !isOccupied && 
         className && className.includes('new-slot');
     

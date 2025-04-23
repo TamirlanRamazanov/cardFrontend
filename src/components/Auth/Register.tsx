@@ -19,12 +19,12 @@ const Register: React.FC = () => {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   
   useEffect(() => {
-    // Очищаем ошибку при монтировании компонента
+
     dispatch(clearError());
   }, [dispatch]);
   
   useEffect(() => {
-    // Редирект на игровую страницу, если пользователь авторизован
+
     if (isAuthenticated) {
       navigate('/game');
     }
